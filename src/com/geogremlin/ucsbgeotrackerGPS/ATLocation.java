@@ -77,8 +77,8 @@ public class ATLocation extends Service {
 		best = locationManager.getBestProvider(crit, true);
 		// best = LocationManager.GPS_PROVIDER;
 		currentLocation = locationManager.getLastKnownLocation(best);
-		String Text = "Last Latitude = " + currentLocation.getLatitude() + "\nLast Longitude = " + currentLocation.getLongitude();
-		Toast.makeText(this, Text, Toast.LENGTH_SHORT).show();
+		// String Text = "Last Latitude = " + currentLocation.getLatitude() + "\nLast Longitude = " + currentLocation.getLongitude();
+		// Toast.makeText(this, Text, Toast.LENGTH_SHORT).show();
 		
 		Timestamp ts = new Timestamp(Calendar.getInstance().getTime().getTime());
 		storeData(""+currentLocation.getLatitude(), ""+currentLocation.getLongitude(), ""+ts);
@@ -88,50 +88,50 @@ public class ATLocation extends Service {
 	
 	@Override
 	public void onDestroy() {
-		Toast.makeText(this, "GPS Tracker Stopped", Toast.LENGTH_SHORT).show();
+		// Toast.makeText(this, "GPS Tracker Stopped", Toast.LENGTH_SHORT).show();
 		locationManager.removeUpdates(locationListener);
 	}
 	
 	@Override
 	public void onStart(Intent intent, int startid) {
-		Toast.makeText(this, "GPS Tracker Started", Toast.LENGTH_SHORT).show();
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,60000, 2, locationListener);
+		// Toast.makeText(this, "GPS Tracker Started", Toast.LENGTH_SHORT).show();
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,60000, 2, locationListener);
 	}
 	
 	public class MyLocationListener implements LocationListener {
 		
 		@Override
 		public void onLocationChanged(Location loc) {
-			Toast.makeText(getApplicationContext(), "Location Changed\nAttempting to send fix to DB", Toast.LENGTH_SHORT).show();
+			// Toast.makeText(getApplicationContext(), "Location Changed\nAttempting to send fix to DB", Toast.LENGTH_SHORT).show();
 			Timestamp ts = new Timestamp(Calendar.getInstance().getTime().getTime());	
 			storeData(""+loc.getLatitude(), ""+loc.getLongitude(), ""+ts);
 		}
 
 		@Override
 		public void onProviderDisabled(String provider) {
-			Toast.makeText( getApplicationContext(),"Gps Disabled",Toast.LENGTH_SHORT ).show();
+			// Toast.makeText( getApplicationContext(),"Gps Disabled",Toast.LENGTH_SHORT ).show();
 		}
 
 		@Override
 		public void onProviderEnabled(String provider) {
-			Toast.makeText( getApplicationContext(),"Gps Enabled",Toast.LENGTH_SHORT).show();
+			// Toast.makeText( getApplicationContext(),"Gps Enabled",Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
-			Toast.makeText( getApplicationContext(),"Location Service changed to "+provider,Toast.LENGTH_SHORT).show();
+			// Toast.makeText( getApplicationContext(),"Location Service changed to "+provider,Toast.LENGTH_SHORT).show();
 		}
 
 	}
 
 	
 	private void storeData(String lat, String lon, String timest) {
-		Toast.makeText( getApplicationContext(),"Entered storeData function",Toast.LENGTH_SHORT ).show();
+		// Toast.makeText( getApplicationContext(),"Entered storeData function",Toast.LENGTH_SHORT ).show();
 		 if (isNetworkAvailable(getApplicationContext())) {
 			 String response = sendLocation(deviceId, lat, lon, timest);
-			 String lines[] = response.split("\\r?\\n");
+			 // String lines[] = response.split("\\r?\\n");
 			 if (response != "0") {
-				 Toast.makeText( getApplicationContext(),"GPS fix successfully stored in the database.",Toast.LENGTH_SHORT).show();
+				 // Toast.makeText( getApplicationContext(),"GPS fix successfully stored in the database.",Toast.LENGTH_SHORT).show();
 			 } else {
 				 Toast.makeText( getApplicationContext(),"There was an error pushing your GPS fix to the database.",Toast.LENGTH_SHORT).show();
 			 }
