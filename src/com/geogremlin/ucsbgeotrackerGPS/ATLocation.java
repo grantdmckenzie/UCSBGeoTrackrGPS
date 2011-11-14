@@ -95,7 +95,7 @@ public class ATLocation extends Service {
 	@Override
 	public void onStart(Intent intent, int startid) {
 		// Toast.makeText(this, "GPS Tracker Started", Toast.LENGTH_SHORT).show();
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,60000, 2, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,60000, 2, locationListener);
 	}
 	
 	public class MyLocationListener implements LocationListener {
@@ -174,6 +174,8 @@ public class ATLocation extends Service {
 	        nameValuePairs.add(new BasicNameValuePair("lat", lat));
 	        nameValuePairs.add(new BasicNameValuePair("lng", lon));
 	        nameValuePairs.add(new BasicNameValuePair("t", timest));
+	        nameValuePairs.add(new BasicNameValuePair("source", "GPS"));
+	        nameValuePairs.add(new BasicNameValuePair("app", "GPS"));
 	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));  
 	  
 	        // Execute HTTP Post Request  
