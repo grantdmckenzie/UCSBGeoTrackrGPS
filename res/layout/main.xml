@@ -5,7 +5,7 @@
     android:layout_height="fill_parent"
     android:background="#ccccff">
     
-    <TextView android:text="Welcome to UCSB GeoTracker (GPS)" 
+    <TextView android:text="Welcome to Test Tracker" 
 		android:id="@+id/TextView01" 
 		android:layout_width="wrap_content" 
 		android:layout_margin="6dp"
