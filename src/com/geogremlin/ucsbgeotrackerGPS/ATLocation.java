@@ -31,10 +31,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -46,26 +42,20 @@ import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-public class ATLocation extends Service implements SensorEventListener{
+public class ATLocation extends Service{
 	private NotificationManager mNM;
 	private int NOTIFICATION = R.string.local_service_started;
 	
 	private LocationManager locationManager;
 	private LocationListener locationListener;
 	private String best;
-	private Location currentLocation;
-	private double accelx = 0;
-	private double accely = 0;
-	private double accelz = 0;
+
 	
 	Criteria crit = null;
 	
 	private TelephonyManager tm;
 	private ConnectivityManager connectivity;
     private String deviceId;
-    
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
     
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -87,17 +77,13 @@ public class ATLocation extends Service implements SensorEventListener{
 	    androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
 	    UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
 	    deviceId = deviceUuid.toString();
-		
-	    mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-	    mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-	    
-	    
+
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		crit = new Criteria();
 		// crit.setAccuracy(Criteria.ACCURACY_FINE);
-		best = locationManager.getBestProvider(crit, true);
-		// best = LocationManager.GPS_PROVIDER;
-		currentLocation = locationManager.getLastKnownLocation(best);
+		// best = locationManager.getBestProvider(crit, true);
+		best = LocationManager.GPS_PROVIDER;
+		// currentLocation = locationManager.getLastKnownLocation(best);
 		// String Text = "Last Latitude = " + currentLocation.getLatitude() + "\nLast Longitude = " + currentLocation.getLongitude();
 		// Toast.makeText(this, Text, Toast.LENGTH_SHORT).show();
 		
@@ -112,14 +98,12 @@ public class ATLocation extends Service implements SensorEventListener{
 		// Toast.makeText(this, "GPS Tracker Stopped", Toast.LENGTH_SHORT).show();
 		mNM.cancel(NOTIFICATION);
 		locationManager.removeUpdates(locationListener);
-		mSensorManager.unregisterListener(this);
 	}
 	
 	@Override
 	public void onStart(Intent intent, int startid) {
 		// Toast.makeText(this, "GPS Tracker Started", Toast.LENGTH_SHORT).show();
 		locationManager.requestLocationUpdates(best,0, 0, locationListener);
-		mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 	}
 	private void showNotification() {
 	      // In this sample, we'll use the same text for the ticker and the expanded notification
@@ -150,7 +134,8 @@ public class ATLocation extends Service implements SensorEventListener{
 		public void onLocationChanged(Location loc) {
 			// Toast.makeText(getApplicationContext(), "Location Changed\nAttempting to send fix to DB", Toast.LENGTH_SHORT).show();
 			
-			Timestamp ts = new Timestamp(Calendar.getInstance().getTime().getTime());	
+			Long tsLong = System.currentTimeMillis()/1000;
+			String ts = tsLong.toString();	
 			storeData(""+loc.getLatitude(), ""+loc.getLongitude(), ""+ts);
 			
 		}
@@ -224,9 +209,7 @@ public class ATLocation extends Service implements SensorEventListener{
 	        nameValuePairs.add(new BasicNameValuePair("t", timest));
 	        nameValuePairs.add(new BasicNameValuePair("source", best));
 	        nameValuePairs.add(new BasicNameValuePair("app", "Test"));
-	        nameValuePairs.add(new BasicNameValuePair("accelx", accelx+""));
-	        nameValuePairs.add(new BasicNameValuePair("accely", accely+""));
-	        nameValuePairs.add(new BasicNameValuePair("accelz", accelz+""));
+	        
 	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));  
 	  
 	        // Execute HTTP Post Request  
@@ -239,21 +222,6 @@ public class ATLocation extends Service implements SensorEventListener{
 	    }  
 	    
 	    return HTTPHelper.request(response);
-	}
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		// TODO Auto-generated method stub
-		accelx = event.values[0];
-		accely = event.values[1];
-		accelz = event.values[2];
-		// Toast.makeText( getApplicationContext(),event.values[0]+","+event.values[1]+","+event.values[2],Toast.LENGTH_SHORT).show();
 	}
 	
 }

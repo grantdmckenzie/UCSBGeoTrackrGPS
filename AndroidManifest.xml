@@ -19,5 +19,10 @@
             </intent-filter>
         </activity>
 		<service android:enabled="true" android:name=".ATLocation" />
+		<service android:enabled="true" android:name=".ATAccel" />
+		<service android:enabled="true" android:name=".AtGetAccel" />
+		
+		<broadcast android:enabled="true" android:name=".ATAlarmService" />
+		<receiver android:name="ATAlarmService"></receiver>
     </application>
 </manifest>

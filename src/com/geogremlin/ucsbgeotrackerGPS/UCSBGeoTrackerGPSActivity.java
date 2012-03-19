@@ -45,7 +45,6 @@ public class UCSBGeoTrackerGPSActivity extends Activity implements OnClickListen
   private TelephonyManager tm;
   private String deviceId;
   private String handler = "http://geogremlin.geog.ucsb.edu/android/tracker-gps/login.php";
-  private ConnectivityManager connectivity;
   private SharedPreferences settings;
   private int at_login;
 
@@ -61,7 +60,6 @@ public class UCSBGeoTrackerGPSActivity extends Activity implements OnClickListen
     settings = getPreferences(MODE_PRIVATE);
     
     tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-	connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	// Get unique device ID
 	String tmDevice, tmSerial, androidId;
     tmDevice = "" + tm.getDeviceId();
@@ -193,7 +191,10 @@ public class UCSBGeoTrackerGPSActivity extends Activity implements OnClickListen
 							if (at_login == 0) {
 						    	int resultint = Integer.parseInt(response.replace("\n","").trim());
 						    	if (resultint == 1) {
+
 									startService(new Intent(getApplicationContext(), ATLocation.class));
+									startService(new Intent(getApplicationContext(), ATAccel.class));
+
 									buttonLogin.setText("Logout");
 									editor.putInt("AT_LOGINSET", 1);
 									at_login = 1;
@@ -211,11 +212,12 @@ public class UCSBGeoTrackerGPSActivity extends Activity implements OnClickListen
 						    		Toast.makeText(getApplicationContext(), "There was an error logging you in.  Please try again.", Toast.LENGTH_SHORT).show();
 						    	}
 							} else {
-					    	    Toast.makeText(getApplicationContext(), "Location Service Stopped", Toast.LENGTH_SHORT).show();
+					    	    Toast.makeText(getApplicationContext(), "Service Stopped", Toast.LENGTH_SHORT).show();
 								editor.putInt("AT_LOGINSET", 0);
 								at_login = 0;
 								editor.commit();
 								stopService(new Intent(getApplicationContext(), ATLocation.class));
+								stopService(new Intent(getApplicationContext(), ATAccel.class));
 								
 								buttonLogin.setText("Login");
 								username.setVisibility(View.VISIBLE);
