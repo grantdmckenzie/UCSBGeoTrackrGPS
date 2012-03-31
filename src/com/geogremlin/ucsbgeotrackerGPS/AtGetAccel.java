@@ -1,20 +1,9 @@
 package com.geogremlin.ucsbgeotrackerGPS;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Service;
 import android.content.Context;
@@ -140,7 +129,7 @@ public class AtGetAccel extends Service implements SensorEventListener {
 		   String response = webService.webGet("", params);
 		   return response;
 	   } catch(Exception e) {
- 	   return "error";
+		   return "error";
 	   }
 	}
 }

@@ -13,7 +13,9 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -80,8 +82,8 @@ public class ATLocation extends Service{
 
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		crit = new Criteria();
-		// crit.setAccuracy(Criteria.ACCURACY_FINE);
-		// best = locationManager.getBestProvider(crit, true);
+		crit.setAccuracy(Criteria.ACCURACY_FINE);
+		///best = locationManager.getBestProvider(crit, true);
 		best = LocationManager.GPS_PROVIDER;
 		// currentLocation = locationManager.getLastKnownLocation(best);
 		// String Text = "Last Latitude = " + currentLocation.getLatitude() + "\nLast Longitude = " + currentLocation.getLongitude();
@@ -160,14 +162,19 @@ public class ATLocation extends Service{
 	
 	private void storeData(String lat, String lon, String timest) {
 		// Toast.makeText( getApplicationContext(),"Entered storeData function",Toast.LENGTH_SHORT ).show();
-		 if (isNetworkAvailable(getApplicationContext())) {
+		 if (isNetworkAvailable()) {
 			 String response = sendLocation(deviceId, lat, lon, timest);
-			 // String lines[] = response.split("\\r?\\n");
-			 if (response != "0") {
-				 // Toast.makeText( getApplicationContext(),"GPS fix successfully stored in the database.",Toast.LENGTH_SHORT).show();
-			 } else {
+			 try {
+				 int resultint = Integer.parseInt(response.replace("\n","").trim());
+				 if (resultint == 1) {
+					 Toast.makeText( getApplicationContext(),"GPS fix successfully stored in the database.",Toast.LENGTH_SHORT).show();
+				 } else {
+					 Toast.makeText( getApplicationContext(),"There was an error pushing your GPS fix to the database.",Toast.LENGTH_SHORT).show();
+				 }
+			 } catch(Exception e) {
 				 Toast.makeText( getApplicationContext(),"There was an error pushing your GPS fix to the database.",Toast.LENGTH_SHORT).show();
 			 }
+			 
 		 } else {
 			 Toast.makeText( getApplicationContext(),"No Data Connection.\nData not sent to server.",Toast.LENGTH_SHORT).show();
 		 }
@@ -176,52 +183,34 @@ public class ATLocation extends Service{
 	
 
 	
-	public boolean isNetworkAvailable(Context context) {
-		try {
-		    if (connectivity != null) {
-		       NetworkInfo[] info = connectivity.getAllNetworkInfo();
-		       if (info != null) {
-		          for (int i = 0; i < info.length; i++) {
-		             if (info[i].getState() == NetworkInfo.State.CONNECTED) {
-		                return true;
-		             }
-		          }
-		       }
-		    } 
-		    return false;
-		} catch (Exception e) {
-			return false;
-		}
-	 }
+	private boolean isNetworkAvailable() {
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+	    if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
+	        return true;
+	    }
+	    return false;
+	}
 	
 	private String sendLocation(String uid, String lat, String lon, String timest) {
 		String handler = "http://geogremlin.geog.ucsb.edu/android/tracker-gps/store_fix.php";
-
-		HttpClient httpclient = new DefaultHttpClient();  
-	    HttpPost httppost = new HttpPost(handler);  
-	    HttpResponse response = null;
-	    try {  
-	        // Add your data  
-	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();  
-	        nameValuePairs.add(new BasicNameValuePair("devid", uid));  
-	        nameValuePairs.add(new BasicNameValuePair("lat", lat));
-	        nameValuePairs.add(new BasicNameValuePair("lng", lon));
-	        nameValuePairs.add(new BasicNameValuePair("t", timest));
-	        nameValuePairs.add(new BasicNameValuePair("source", best));
-	        nameValuePairs.add(new BasicNameValuePair("app", "Test"));
-	        
-	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));  
-	  
-	        // Execute HTTP Post Request  
-	        response = httpclient.execute(httppost);  
-	          
-	    } catch (ClientProtocolException e) {  
-	        // TODO Auto-generated catch block  
-	    } catch (IOException e) {  
-	        // TODO Auto-generated catch block  
-	    }  
-	    
-	    return HTTPHelper.request(response);
+	   WebService webService = new WebService(handler);
+		   
+	   //Pass lat/lng params
+	   Map<String, String> params = new HashMap<String, String>();
+	   params.put("devid", uid);
+	   params.put("lat", lat);
+	   params.put("lng", lon);
+	   params.put("t", timest);
+	   params.put("source", best);
+	   params.put("app", "Test");
+			   
+	   try {
+		   String response = webService.webGet("", params);
+		   return response;
+	   } catch(Exception e) {
+		   return "error";
+	   }
 	}
 	
 }
